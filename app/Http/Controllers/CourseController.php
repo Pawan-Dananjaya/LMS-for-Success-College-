@@ -1,101 +1,90 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\Enrollment;
-use App\Models\Lesson;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
-    public function index(Request $request)
+    public function __construct()
     {
-        $query = Course::with('teacher')->where('is_published', true);
-
-        if ($request->has('grade')) {
-            $query->where('grade_level', $request->grade);
-        }
-
-        if ($request->has('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
-        }
-
-        $courses = $query->paginate(12);
-        $grades = ['Grade 1-2', 'Grade 3-5'];
-
-        return view('courses.index', compact('courses', 'grades'));
+        // protect creation routes
+        $this->middleware('auth')->only(['create', 'store']);
+    }
+    public function index()
+    {
+        $courses = Course::all();
+        return view('courses.index', compact('courses'));
     }
 
     public function show($id)
     {
-        $course = Course::with(['lessons', 'teacher'])->findOrFail($id);
-        
-        if (auth()->check()) {
-            $enrollment = Enrollment::where('user_id', auth()->id())
-                ->where('course_id', $id)
-                ->first();
-        } else {
-            $enrollment = null;
-        }
-
-        return view('courses.show', compact('course', 'enrollment'));
+        $course = Course::findOrFail($id);
+        return view('courses.show', compact('course'));
     }
 
     public function create()
     {
+        // allow only teachers or admins
+        if (!auth()->check() || (!auth()->user()->isTeacher() && !auth()->user()->isAdmin())) {
+            abort(403);
+        }
+
         return view('courses.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'grade_level' => 'required|string',
-            'subject' => 'required|string',
-            'thumbnail' => 'nullable|image|max:2048'
+            'description' => 'nullable|string',
+            'grade_level' => 'required|integer|min:1|max:5',
+            'subject' => 'nullable|string|max:255',
         ]);
 
-        $thumbnailPath = null;
-        if ($request->hasFile('thumbnail')) {
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
+        // Only teachers or admins can create courses
+        if (!auth()->check() || (!auth()->user()->isTeacher() && !auth()->user()->isAdmin())) {
+            abort(403);
         }
 
-        $course = Course::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'grade_level' => $request->grade_level,
-            'subject' => $request->subject,
-            'thumbnail' => $thumbnailPath,
-            'teacher_id' => auth()->id(),
-            'is_published' => $request->has('publish')
-        ]);
+        // Assign the current user as the teacher/creator to satisfy the non-null FK
+        $data['teacher_id'] = auth()->id();
 
-        return redirect()->route('courses.show', $course->id)
-            ->with('success', 'Course created successfully!');
+        // Migration expects grade_level as string, cast to string to avoid DB type issues
+        if (isset($data['grade_level'])) {
+            $data['grade_level'] = (string) $data['grade_level'];
+        }
+
+        try {
+            \App\Models\Course::create($data);
+        } catch (\Exception $e) {
+            // Log and return a friendly error instead of raw exception output
+            logger()->error('Course creation failed: ' . $e->getMessage());
+            return back()->withInput()->withErrors(['error' => 'Failed to create course. Check logs for details.']);
+        }
+
+        return redirect()->route('courses.index')->with('success', 'Course created successfully');
     }
 
     public function enroll($id)
     {
-        $course = Course::findOrFail($id);
+        // Add enrollment logic here
+    }
 
-        // Check if already enrolled
-        $existingEnrollment = Enrollment::where('user_id', auth()->id())
-            ->where('course_id', $id)
-            ->first();
-
-        if ($existingEnrollment) {
-            return redirect()->back()->with('error', 'You are already enrolled in this course.');
+    public function getByGrade($grade)
+    {
+        // Parse grade range if provided (e.g., "1-2" becomes [1,2])
+        if (strpos($grade, '-') !== false) {
+            list($min, $max) = explode('-', $grade);
+            $courses = Course::whereBetween('grade_level', [$min, $max])->get();
+        } else {
+            $courses = Course::where('grade_level', $grade)->get();
         }
 
-        Enrollment::create([
-            'user_id' => auth()->id(),
-            'course_id' => $id,
-            'status' => 'active'
+        return view('courses.grade', [
+            'courses' => $courses,
+            'grade' => $grade
         ]);
-
-        return redirect()->route('courses.show', $id)
-            ->with('success', 'Successfully enrolled in the course!');
     }
 }

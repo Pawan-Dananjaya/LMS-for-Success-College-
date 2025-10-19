@@ -31,6 +31,42 @@
     </div>
 </div>
 
+<!-- ✅ Quick Access to PDF Materials -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-file-pdf me-2"></i>Your Learning Materials</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @if(auth()->user()->grade >= 1 && auth()->user()->grade <= 2)
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-child me-2"></i>Grade 1-2 Materials</h6>
+                                <p class="mb-2">Access your ICT learning PDFs</p>
+                                <a href="{{ route('pdf.grade', '1-2') }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-book-open me-1"></i> View Materials
+                                </a>
+                            </div>
+                        </div>
+                    @elseif(auth()->user()->grade >= 3 && auth()->user()->grade <= 5)
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-user-graduate me-2"></i>Grade 3-5 Materials</h6>
+                                <p class="mb-2">Access your ICT learning PDFs</p>
+                                <a href="{{ route('pdf.grade', '3-5') }}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-book-open me-1"></i> View Materials
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <!-- My Courses -->
     <div class="col-lg-8">
@@ -100,4 +136,12 @@
                         </a>
                     </div>
                 </div>
-               
+                @endforeach
+                @else
+                <p class="text-muted text-center">No recommendations available yet.</p>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

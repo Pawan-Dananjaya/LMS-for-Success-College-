@@ -92,26 +92,24 @@
                                 <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                             </a>
                         </li>
+                        <!-- Courses links removed as requested -->
+                        @if(auth()->check() && auth()->user()->isAdmin())
                         <li class="nav-item">
-                            <a class="nav-link {{ Request::is('courses*') ? 'active' : '' }}" href="{{ route('courses.index') }}">
-                                <i class="fas fa-book me-2"></i> Courses
-                            </a>
-                        </li>
-                        @if(auth()->user()->isTeacher() || auth()->user()->isAdmin())
-                        <li class="nav-item">
-                            <a class="nav-link {{ Request::is('courses/create') ? 'active' : '' }}" href="{{ route('courses.create') }}">
-                                <i class="fas fa-plus-circle me-2"></i> Create Course
+                            <a class="nav-link {{ Request::is('admin*') ? 'active' : '' }}" href="{{ route('admin.pending') }}">
+                                <i class="fas fa-user-shield me-2"></i> Pending Approvals
                             </a>
                         </li>
                         @endif
                     </ul>
                     
+                    @if(auth()->check())
                     <div class="mt-4 p-3 border-top">
                         <div class="text-white">
                             <small>Logged in as: <strong>{{ auth()->user()->name }}</strong></small><br>
                             <small>Role: <span class="badge bg-primary">{{ ucfirst(auth()->user()->role) }}</span></small>
                         </div>
                     </div>
+                    @endif
                 </div>
             </nav>
 
@@ -127,10 +125,10 @@
                             <ul class="navbar-nav ms-auto">
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-user-circle me-1"></i> {{ auth()->user()->name }}
+                                        <i class="fas fa-user-circle me-1"></i> {{ auth()->check() ? auth()->user()->name : 'Guest' }}
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i> Profile</a></li>
+                                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user me-2"></i> Profile</a></li>
                                         <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>

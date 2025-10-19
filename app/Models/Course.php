@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,8 +10,8 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'description', 'grade_level', 'subject', 
-        'thumbnail', 'is_published', 'teacher_id'
+        'title', 'description', 'grade_level', 'subject',
+        'thumbnail', 'is_published', 'teacher_id',
     ];
 
     protected $casts = [
@@ -32,10 +33,10 @@ class Course extends Model
         return $this->hasMany(Enrollment::class);
     }
 
-    public function enrolledStudents()
+    public function students()
     {
-        return $this->belongsToMany(User::class, 'enrollments')
-                    ->withPivot('status', 'progress')
-                    ->withTimestamps();
+        return $this->belongsToMany(User::class, 'enrollments', 'course_id', 'user_id')
+                    ->withTimestamps()
+                    ->withPivot('status');
     }
 }
