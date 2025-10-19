@@ -1,0 +1,58 @@
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/node_modules/
+
+# Laravel / PHP
+/vendor/
+/public/hot
+/public/storage
+/storage/*.key
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+auth.json
+
+# Environment files
+.env
+.env.*
+
+# Logs and databases
+/storage/logs/
+/storage/*.log
+/storage/*.sqlite
+
+# Laravel framework generated files
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+
+# Build tools
+/public/build/
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# IDEs and editors
+/.idea/
+/.vscode/
+.phpstorm.meta.php
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Node modules lock files (optional)
+# Uncomment if you don't want to commit lockfiles
+# package-lock.json
+# yarn.lock
+
+# Project-specific large media (prevent accidental pushes)
+/public/image/
+/public/pdfs/
+
+# Other
+/.fleet/
+
