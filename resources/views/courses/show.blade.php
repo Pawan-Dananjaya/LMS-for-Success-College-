@@ -9,7 +9,9 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="mb-0">{{ $course->title }}</h3>
-                    <small class="text-muted">Grade {{ $course->grade_level }} &middot; {{ $course->subject }}</small>
+                    <small class="text-muted">
+                        Grades: {{ $course->grades ? implode(', ', $course->grades) : $course->grade_level }} &middot; {{ $course->subject }}
+                    </small>
                 </div>
                 <div class="card-body">
                     <p>{{ $course->description }}</p>

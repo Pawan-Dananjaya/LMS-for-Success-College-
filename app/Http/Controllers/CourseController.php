@@ -39,7 +39,8 @@ class CourseController extends Controller
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'grade_level' => 'required|integer|min:1|max:5',
+            'grades' => 'required|array',
+            'grades.*' => 'integer|min:1|max:12',
             'subject' => 'nullable|string|max:255',
         ]);
 
@@ -51,9 +52,10 @@ class CourseController extends Controller
         // Assign the current user as the teacher/creator to satisfy the non-null FK
         $data['teacher_id'] = auth()->id();
 
-        // Migration expects grade_level as string, cast to string to avoid DB type issues
-        if (isset($data['grade_level'])) {
-            $data['grade_level'] = (string) $data['grade_level'];
+        // Save grades as array and keep a legacy grade_level for compatibility
+        if (!empty($data['grades']) && is_array($data['grades'])) {
+            $data['grades'] = array_values(array_map('intval', $data['grades']));
+            $data['grade_level'] = (string) ($data['grades'][0] ?? '1');
         }
 
         try {
@@ -77,9 +79,14 @@ class CourseController extends Controller
         // Parse grade range if provided (e.g., "1-2" becomes [1,2])
         if (strpos($grade, '-') !== false) {
             list($min, $max) = explode('-', $grade);
-            $courses = Course::whereBetween('grade_level', [$min, $max])->get();
+            $courses = Course::whereBetween('grade_level', [$min, $max])
+                        ->orWhereRaw("JSON_CONTAINS(grades, JSON_ARRAY(?))", [intval($min)])
+                        ->get();
         } else {
-            $courses = Course::where('grade_level', $grade)->get();
+            $g = intval($grade);
+            $courses = Course::where('grade_level', $grade)
+                        ->orWhereRaw("JSON_CONTAINS(grades, JSON_ARRAY(?))", [$g])
+                        ->get();
         }
 
         return view('courses.grade', [

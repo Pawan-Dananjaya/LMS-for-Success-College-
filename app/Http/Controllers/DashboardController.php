@@ -31,8 +31,44 @@ class DashboardController extends Controller
         ];
 
         $recent_courses = Course::with('teacher')->latest()->take(5)->get();
+        // Combine DB PDFs with filesystem PDFs for recent list
+        $dbPdfs = \App\Models\Pdf::with('uploader','course')->get();
+        $display = [];
+        foreach ($dbPdfs as $p) {
+            $display[] = (object)[
+                'type' => 'db',
+                'id' => $p->id,
+                'filename' => $p->filename,
+                'original_name' => $p->original_name,
+                'uploader' => $p->uploader,
+                'course' => $p->course,
+                'created_at' => $p->created_at,
+            ];
+        }
 
-        return view('dashboard.admin', compact('stats', 'recent_courses'));
+        $path = public_path('pdfs');
+        if (is_dir($path)) {
+            $all = scandir($path);
+            foreach ($all as $f) {
+                if (in_array($f, ['.', '..'])) continue;
+                if ($dbPdfs->where('filename', $f)->count() > 0) continue;
+                $display[] = (object)[
+                    'type' => 'file',
+                    'filename' => $f,
+                    'original_name' => $f,
+                    'uploader' => null,
+                    'course' => null,
+                    'created_at' => filemtime($path . '/' . $f) ? \Carbon\Carbon::createFromTimestamp(filemtime($path . '/' . $f)) : null,
+                ];
+            }
+        }
+
+        // sort by created_at descending and take 8
+        $recent_pdfs = collect($display)->sortByDesc(function($i){ return $i->created_at ? $i->created_at->timestamp : 0; })->values()->take(8);
+        $students = User::where('role', 'student')->latest()->take(10)->get();
+        $teachers = User::where('role', 'teacher')->latest()->take(10)->get();
+
+        return view('dashboard.admin', compact('stats', 'recent_courses', 'recent_pdfs', 'students', 'teachers'));
     }
 
     private function teacherDashboard()

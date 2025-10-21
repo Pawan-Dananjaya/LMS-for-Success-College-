@@ -82,6 +82,8 @@ Route::middleware(['auth'])->group(function () {
         
         // Download specific PDF with access control
         Route::get('/download/{grade}', [PDFController::class, 'downloadPDF'])->name('download');
+        // Download PDF by database id (preferred for DB-managed PDFs)
+        Route::get('/download/pdf/{id}', [PDFController::class, 'downloadById'])->name('download.byId');
     });
 });
 

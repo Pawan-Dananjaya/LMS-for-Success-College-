@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Pdf;
 
 class PDFController extends Controller
 {
@@ -112,12 +113,45 @@ class PDFController extends Controller
             }
         }
         
-        $filePath = public_path("pdfs/ICT SIC - Grade {$grade} LMS.pdf");
-        
-        if (!file_exists($filePath)) {
-            abort(404, 'PDF not found');
+        // Legacy method retained for simple grade downloads. Attempt to find a PDF matching the naming schema first.
+        $legacyPath = public_path("pdfs/ICT SIC - Grade {$grade} LMS.pdf");
+        if (file_exists($legacyPath)) {
+            return response()->download($legacyPath, "Grade_{$grade}_ICT_Materials.pdf");
         }
-        
-        return response()->download($filePath, "Grade_{$grade}_ICT_Materials.pdf");
+
+        // Otherwise, try to find any DB PDF that includes this grade
+        $pdf = Pdf::whereJsonContains('grades', intval($grade))->first();
+        if ($pdf && file_exists(public_path('pdfs/' . $pdf->filename))) {
+            return response()->download(public_path('pdfs/' . $pdf->filename), $pdf->original_name);
+        }
+
+        abort(404, 'PDF not found');
+    }
+
+    /**
+     * Download a PDF by its DB id (admin/teacher downloads and authorization applied)
+     */
+    public function downloadById($id)
+    {
+        $user = Auth::user();
+        $pdf = Pdf::with('course')->findOrFail($id);
+
+        // Admins/Teachers can download any PDF
+        if (!($user->isTeacher() || $user->isAdmin())) {
+            // Check student's grade access
+            $allowed = false;
+            if (!empty($pdf->grades) && is_array($pdf->grades)) {
+                $allowed = in_array((int)$user->grade, $pdf->grades, true);
+            } elseif ($pdf->course && !empty($pdf->course->grades)) {
+                $allowed = in_array((int)$user->grade, $pdf->course->grades, true);
+            }
+
+            if (!$allowed) abort(403, 'Access denied');
+        }
+
+        $path = public_path('pdfs/' . $pdf->filename);
+        if (!file_exists($path)) abort(404, 'PDF not found');
+
+        return response()->download($path, $pdf->original_name);
     }
 }

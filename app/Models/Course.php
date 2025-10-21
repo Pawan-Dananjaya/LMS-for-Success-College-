@@ -10,12 +10,13 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'description', 'grade_level', 'subject',
+        'title', 'description', 'grade_level', 'grades', 'subject',
         'thumbnail', 'is_published', 'teacher_id',
     ];
 
     protected $casts = [
         'is_published' => 'boolean',
+        'grades' => 'array',
     ];
 
     public function teacher()

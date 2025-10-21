@@ -82,7 +82,7 @@
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="position-sticky pt-3">
                     <div class="text-center mb-4">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" width="80" height="80" class="rounded-circle border border-3 border-warning">
+                        <img src="{{ asset('image/logo.png') }}" alt="Logo" width="80" height="80" >
                         <h5 class="text-white mt-2">College LMS</h5>
                     </div>
                     
@@ -93,9 +93,16 @@
                             </a>
                         </li>
                         <!-- Courses links removed as requested -->
+                        @if(auth()->check() && (auth()->user()->isAdmin() || auth()->user()->isTeacher()))
+                        <li class="nav-item">
+                            <a class="nav-link {{ Request::is('admin/pdfs') ? 'active' : '' }}" href="{{ route('admin.pdfs') }}">
+                                <i class="fas fa-file-pdf me-2"></i> Manage PDFs
+                            </a>
+                        </li>
+                        @endif
                         @if(auth()->check() && auth()->user()->isAdmin())
                         <li class="nav-item">
-                            <a class="nav-link {{ Request::is('admin*') ? 'active' : '' }}" href="{{ route('admin.pending') }}">
+                            <a class="nav-link {{ Request::is('admin/pending-users') ? 'active' : '' }}" href="{{ route('admin.pending') }}">
                                 <i class="fas fa-user-shield me-2"></i> Pending Approvals
                             </a>
                         </li>
@@ -129,7 +136,6 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="fas fa-user me-2"></i> Profile</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="POST" action="{{ route('logout') }}">

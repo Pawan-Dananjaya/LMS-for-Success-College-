@@ -28,7 +28,9 @@
 
                             @if(!empty($course->grade_level) || !empty($course->subject))
                                 <p class="card-text text-muted">
-                                    @if(!empty($course->grade_level))
+                                    @if(!empty($course->grades))
+                                        Grades: {{ implode(', ', $course->grades) }}
+                                    @elseif(!empty($course->grade_level))
                                         Grade: {{ $course->grade_level }}
                                     @endif
 

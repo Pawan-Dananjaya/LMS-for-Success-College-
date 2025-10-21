@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Pdf;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -54,37 +56,88 @@ class AdminController extends Controller
     // List PDFs
     public function pdfs()
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        // Allow both admins and teachers to manage PDFs
+        if (!auth()->check() || (!auth()->user()->isAdmin() && !auth()->user()->isTeacher())) {
             abort(403);
         }
+        // Load courses for selection and existing db pdf records
+        $courses = Course::orderBy('title')->get();
+        $dbPdfs = Pdf::with(['course', 'uploader'])->orderBy('created_at', 'desc')->get();
 
-        $files = [];
+        // Build a display list merging DB records and filesystem files
+        $display = [];
+
+        // Add DB records first
+        foreach ($dbPdfs as $p) {
+            $display[] = (object) [
+                'type' => 'db',
+                'id' => $p->id,
+                'filename' => $p->filename,
+                'original_name' => $p->original_name,
+                'course' => $p->course,
+                'grades' => $p->grades,
+                'uploader' => $p->uploader,
+                'created_at' => $p->created_at,
+            ];
+        }
+
+        // Scan public/pdfs for legacy files and include ones not in DB
         $path = public_path('pdfs');
         if (is_dir($path)) {
             $all = scandir($path);
             foreach ($all as $f) {
                 if (in_array($f, ['.', '..'])) continue;
-                $files[] = $f;
+                // skip if already in DB
+                if ($dbPdfs->where('filename', $f)->count() > 0) continue;
+
+                // attempt to infer grade from filename (e.g., 'Grade 1')
+                $grades = null;
+                if (preg_match('/Grade\s*(\d+)/i', $f, $m)) {
+                    $grades = [(int)$m[1]];
+                }
+
+                $display[] = (object) [
+                    'type' => 'file',
+                    'filename' => $f,
+                    'original_name' => $f,
+                    'course' => null,
+                    'grades' => $grades,
+                    'uploader' => null,
+                    'created_at' => filemtime($path . '/' . $f) ? \Carbon\Carbon::createFromTimestamp(filemtime($path . '/' . $f)) : null,
+                ];
             }
         }
 
-        return view('admin.pdfs', compact('files'));
+        return view('admin.pdfs', ['pdfs' => collect($display), 'courses' => $courses]);
     }
 
     // Upload PDF
     public function uploadPdf(Request $request)
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        // Allow both admins and teachers to upload PDFs
+        if (!auth()->check() || (!auth()->user()->isAdmin() && !auth()->user()->isTeacher())) {
             abort(403);
         }
 
         $request->validate([
-            'pdf' => 'required|file|mimes:pdf|max:10240'
+            'pdf' => 'required|file|mimes:pdf|max:10240',
+            'course_id' => 'nullable|exists:courses,id',
+            'grades' => 'nullable|array',
+            'grades.*' => 'integer|min:1'
         ]);
 
         $file = $request->file('pdf');
-        $name = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $file->getClientOriginalName());
+        $original = $file->getClientOriginalName();
+        $name = time() . '_' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $original);
         $file->move(public_path('pdfs'), $name);
+
+        $pdf = Pdf::create([
+            'filename' => $name,
+            'original_name' => $original,
+            'course_id' => $request->input('course_id'),
+            'grades' => $request->input('grades') ?: null,
+            'uploaded_by' => auth()->id(),
+        ]);
 
         return redirect()->route('admin.pdfs')->with('success', 'PDF uploaded.');
     }
@@ -92,13 +145,20 @@ class AdminController extends Controller
     // Delete PDF
     public function deletePdf($filename)
     {
-        if (!auth()->check() || !auth()->user()->isAdmin()) {
+        // Allow both admins and teachers to delete PDFs
+        if (!auth()->check() || (!auth()->user()->isAdmin() && !auth()->user()->isTeacher())) {
             abort(403);
         }
 
-        $path = public_path('pdfs/' . $filename);
-        if (file_exists($path)) {
-            unlink($path);
+        $pdf = Pdf::where('filename', $filename)->first();
+        if ($pdf) {
+            $path = public_path('pdfs/' . $pdf->filename);
+            if (file_exists($path)) unlink($path);
+            $pdf->delete();
+        } else {
+            // fallback to direct file remove if record missing
+            $path = public_path('pdfs/' . $filename);
+            if (file_exists($path)) unlink($path);
         }
 
         return redirect()->route('admin.pdfs')->with('success', 'PDF removed.');

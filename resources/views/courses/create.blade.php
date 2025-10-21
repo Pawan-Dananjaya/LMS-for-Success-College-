@@ -18,14 +18,14 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="grade_level" class="form-label">Grade Level</label>
-                            <select id="grade_level" name="grade_level" class="form-select" required>
-                                <option value="1">Grade 1</option>
-                                <option value="2">Grade 2</option>
-                                <option value="3">Grade 3</option>
-                                <option value="4">Grade 4</option>
-                                <option value="5">Grade 5</option>
-                            </select>
+                            <label class="form-label">Grade Levels (select one or more)</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                @for($g=1;$g<=12;$g++)
+                                    <label class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="grades[]" value="{{ $g }}"> <span class="form-check-label">Grade {{ $g }}</span>
+                                    </label>
+                                @endfor
+                            </div>
                         </div>
 
                         <div class="mb-3">
