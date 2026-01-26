@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Create admin user (per request)
         User::updateOrCreate(
-            ['email' => 'admin@admin.com'],
+            ['email' => 'admin@gmail.com'],
             [
                 'name' => 'System Administrator',
-                'password' => Hash::make('successpassword'),
+                'password' => Hash::make('successpassword1'),
                 'role' => 'admin',
                 'whatsapp_number' => '+1234567890',
                 'address' => 'College Administration Building',
@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
 
         // Create sample teacher (idempotent)
         User::updateOrCreate(
-            ['email' => 'teacher@college.edu'],
+            ['email' => 'teacher@gmail.com'],
             [
                 'name' => 'John Smith',
                 'password' => Hash::make('password'),
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
 
         // Create sample student (idempotent)
         User::updateOrCreate(
-            ['email' => 'student@college.edu'],
+            ['email' => 'student@gmail.com'],
             [
                 'name' => 'Student One',
                 'password' => Hash::make('password'),

@@ -1,201 +1,298 @@
 @extends('layouts.app')
 
-@section('title', 'Register - College LMS')
+@section('title', 'Student Registration')
 
 @section('styles')
 <style>
-/* Simple, clean, responsive styles (matches the girl's DB fields) */
-.wrapper {
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-  padding:20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-.card {
-  width:100%;
-  max-width:540px;
-  background: #fff;
-  border-radius:14px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.18);
-  overflow:hidden;
-}
-.header {
-  background: linear-gradient(135deg,#6c5ce7,#a29bfe);
-  color:#fff;
-  text-align:center;
-  padding:22px;
-}
-.brand-img{ width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,255,255,0.15);object-fit:cover; display:inline-block; }
-.body { padding:22px; }
-.input-group-text { background:#f6f7fb;border:2px solid #eef1f6;border-right:none;border-radius:10px 0 0 10px; }
-.form-control, .form-select { border:2px solid #eef1f6;border-left:none;border-radius:0 10px 10px 0;padding:10px 12px; }
-.form-control:focus, .form-select:focus { border-color: rgba(108,92,231,0.9); box-shadow:0 0 0 0.12rem rgba(108,92,231,0.12); outline:none; }
-.btn-primary { background: linear-gradient(135deg,#6c5ce7,#764ba2); color:#fff; border:none; padding:12px; border-radius:10px; width:100%; font-weight:700; }
-.small-error { color:#d63384; font-size:0.88rem; margin-top:6px; display:block; }
-.disabled { opacity:0.6; pointer-events:none; }
-@media (max-width:520px){ .body{padding:16px} .header{padding:18px} }
+    :root {
+        --primary-navy: #14213d;
+        --secondary-navy: #2c3e50;
+        --accent-gold: #fca311;
+        --text-dark: #1d1d1f;
+        --text-muted: #6c757d;
+    }
+
+    /* === BACKGROUND & LAYOUT === */
+    .auth-body-bg {
+        background: linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-navy) 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        position: relative;
+    }
+
+    /* === REGISTER CARD === */
+    .register-card {
+        background: rgba(255, 255, 255, 0.98);
+        width: 100%;
+        max-width: 600px; /* Wider for 2-column layout */
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        padding: 40px;
+        position: relative;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* === HEADER === */
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .brand-logo {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 15px;
+    }
+
+    .auth-title {
+        color: var(--primary-navy);
+        font-weight: 800;
+        font-size: 1.6rem;
+        margin-bottom: 5px;
+    }
+
+    .auth-subtitle {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    /* === FORM ELEMENTS === */
+    .form-label {
+        color: var(--primary-navy);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .input-group-custom {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        color: #adb5bd;
+        font-size: 1.1rem;
+        z-index: 5;
+    }
+
+    .form-control-custom, .form-select-custom {
+        width: 100%;
+        padding: 12px 15px 12px 50px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+        transition: all 0.3s;
+        background: #f8f9fa;
+    }
+
+    .form-control-custom:focus, .form-select-custom:focus {
+        border-color: var(--primary-navy);
+        background: white;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(20, 33, 61, 0.1);
+    }
+
+    /* === BUTTONS === */
+    .btn-register {
+        background: var(--accent-gold);
+        color: var(--primary-navy);
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(252, 163, 17, 0.2);
+    }
+
+    .btn-register:hover {
+        background: #e59400;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px rgba(252, 163, 17, 0.3);
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 25px;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+    
+    .login-link a {
+        color: var(--primary-navy);
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    /* === HELPER CLASSES === */
+    .disabled-field {
+        opacity: 0.5;
+        pointer-events: none;
+        background-color: #e9ecef;
+    }
 </style>
 @endsection
 
 @section('content')
-<div class="wrapper" role="main" aria-labelledby="register-heading">
-  <div class="card" role="region" aria-label="Register panel">
-    <div class="header">
-      <img src="{{ asset('image/logo.png') }}" alt="College LMS logo" class="brand-img"
-           onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDE0TDE2IDExTDEyIDhWMTQiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMiAyMkM2LjQ3cyAyMiAyIDE3LjUyMyAyIDEyQzIgNi40NzcgNi40NzcgMiAxMiAyQzE3LjUyMyAyIDIyIDYuNDc3IDIyIDEyQzIyIDE3LjUyMyAxNy41MjMgMjIgMTIgMjIiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4K';">
-      <h3 id="register-heading" style="margin:8px 0 0;">Success College LMS</h3>
-      <p style="margin:6px 0 0; opacity:.95">Create your account</p>
-    </div>
-
-    <div class="body">
-      @if(session('success'))
-        <div class="alert alert-success" role="status"><i class="fas fa-check-circle me-1"></i> {{ session('success') }}</div>
-      @endif
-
-      <form method="POST" action="{{ route('register') }}" id="registerForm" novalidate>
-        @csrf
-
-        <!-- Full Name -->
-        <div class="mb-3">
-          <label for="name" class="form-label">Full Name</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-user"></i></span>
-            <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
-                   value="{{ old('name') }}" placeholder="Enter your full name" required autofocus>
-          </div>
-          @error('name') <span class="small-error">{{ $message }}</span> @enderror
+<div class="auth-body-bg">
+    <div class="register-card">
+        
+        <div class="auth-header">
+            <img src="{{ asset('image/logo.png') }}" alt="Success Logo" class="brand-logo">
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Join the Success International College Learning Portal</p>
         </div>
 
-        <!-- Email -->
-        <div class="mb-3">
-          <label for="email" class="form-label">Email Address</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-            <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror"
-                   value="{{ old('email') }}" placeholder="Enter your email" required>
-          </div>
-          @error('email') <span class="small-error">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="row gx-2">
-          <!-- Role -->
-          <div class="col-md-6 mb-3">
-            <label for="role" class="form-label">I am a</label>
-            <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
-              <option value="" disabled {{ old('role') ? '' : 'selected' }}>Select role</option>
-              <option value="student" {{ old('role')=='student' ? 'selected' : '' }}>Student</option>
-              <option value="teacher" {{ old('role')=='teacher' ? 'selected' : '' }}>Teacher</option>
-            </select>
-            @error('role') <span class="small-error">{{ $message }}</span> @enderror
-          </div>
-
-          <!-- Grade (For Students Only) -->
-          <div class="col-md-6 mb-3" id="gradeWrapper">
-            <label for="grade" class="form-label">Grade Level <span class="text-danger">*</span></label>
-            <select id="grade" name="grade" class="form-select @error('grade') is-invalid @enderror">
-                <option value="" disabled {{ old('grade') ? '' : 'selected' }}>Select your grade</option>
-                <option value="1" {{ old('grade')=='1' ? 'selected' : '' }}>Grade 1</option>
-                <option value="2" {{ old('grade')=='2' ? 'selected' : '' }}>Grade 2</option>
-                <option value="3" {{ old('grade')=='3' ? 'selected' : '' }}>Grade 3</option>
-                <option value="4" {{ old('grade')=='4' ? 'selected' : '' }}>Grade 4</option>
-                <option value="5" {{ old('grade')=='5' ? 'selected' : '' }}>Grade 5</option>
-            </select>
-            <small class="text-muted">Select your current grade level</small>
-            @error('grade') <span class="small-error">{{ $message }}</span> @enderror
-          </div>
-        </div>
-
-        <!-- WhatsApp -->
-        <div class="mb-3">
-          <label for="whatsapp_number" class="form-label">WhatsApp Number</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
-            <input id="whatsapp_number" name="whatsapp_number" type="text" class="form-control"
-                   value="{{ old('whatsapp_number') }}" placeholder="Enter your WhatsApp number">
-          </div>
-          @error('whatsapp_number') <span class="small-error">{{ $message }}</span> @enderror
-        </div>
-
-        <!-- Address -->
-        <div class="mb-3">
-          <label for="address" class="form-label">Address</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="fas fa-home"></i></span>
-            <input id="address" name="address" type="text" class="form-control @error('address') is-invalid @enderror"
-                   value="{{ old('address') }}" placeholder="Enter your address" required>
-          </div>
-          @error('address') <span class="small-error">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="row gx-2">
-          <!-- Password -->
-          <div class="col-md-6 mb-3">
-            <label for="password" class="form-label">Password</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="fas fa-lock"></i></span>
-              <input id="password" name="password" type="password" class="form-control @error('password') is-invalid @enderror"
-                     placeholder="Create password" required>
+        @if(session('success'))
+            <div class="alert alert-success d-flex align-items-center mb-4">
+                <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
             </div>
-            @error('password') <span class="small-error">{{ $message }}</span> @enderror
-          </div>
+        @endif
 
-          <!-- Confirm -->
-          <div class="col-md-6 mb-3">
-            <label for="password_confirmation" class="form-label">Confirm Password</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="fas fa-lock"></i></span>
-              <input id="password_confirmation" name="password_confirmation" type="password" class="form-control"
-                     placeholder="Confirm password" required>
+        <form method="POST" action="{{ route('register') }}" id="registerForm">
+            @csrf
+
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <div class="input-group-custom">
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" name="name" class="form-control-custom" 
+                           placeholder="Enter your full name" value="{{ old('name') }}" required>
+                </div>
+                @error('name') <small class="text-danger fw-bold">{{ $message }}</small> @enderror
             </div>
-          </div>
-        </div>
 
-        <div class="d-grid mt-2">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-user-plus me-1"></i> Create Account</button>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <div class="input-group-custom">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" name="email" class="form-control-custom" 
+                           placeholder="student@example.com" value="{{ old('email') }}" required>
+                </div>
+                @error('email') <small class="text-danger fw-bold">{{ $message }}</small> @enderror
+            </div>
 
-        <div class="text-center mt-3">
-          <small>Already have an account? <a href="{{ route('login') }}" style="color:#6c5ce7; font-weight:600">Sign in here</a></small>
-        </div>
-      </form>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">I am a...</label>
+                    <div class="input-group-custom">
+                        <i class="fas fa-user-tag input-icon"></i>
+                        <select name="role" id="roleSelect" class="form-select-custom" required>
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
+                            <option value="teacher" {{ old('role') == 'teacher' ? 'selected' : '' }}>Teacher</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6" id="gradeContainer">
+                    <label class="form-label">Grade Level <span class="text-danger">*</span></label>
+                    <div class="input-group-custom">
+                        <i class="fas fa-graduation-cap input-icon"></i>
+                        <select name="grade" id="gradeSelect" class="form-select-custom">
+                            <option value="" disabled selected>Select Grade</option>
+                            <option value="1">Grade 1</option>
+                            <option value="2">Grade 2</option>
+                            <option value="3">Grade 3</option>
+                            <option value="4">Grade 4</option>
+                            <option value="5">Grade 5</option>
+                        </select>
+                    </div>
+                    @error('grade') <small class="text-danger fw-bold">{{ $message }}</small> @enderror
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">WhatsApp Number</label>
+                    <div class="input-group-custom">
+                        <i class="fab fa-whatsapp input-icon"></i>
+                        <input type="text" name="whatsapp_number" class="form-control-custom" 
+                               placeholder="07X XXXXXXX" value="{{ old('whatsapp_number') }}">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Address</label>
+                    <div class="input-group-custom">
+                        <i class="fas fa-map-marker-alt input-icon"></i>
+                        <input type="text" name="address" class="form-control-custom" 
+                               placeholder="Your City" value="{{ old('address') }}" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <div class="input-group-custom">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password" class="form-control-custom" 
+                               placeholder="Create password" required>
+                    </div>
+                    @error('password') <small class="text-danger fw-bold">{{ $message }}</small> @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Confirm Password</label>
+                    <div class="input-group-custom">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input type="password" name="password_confirmation" class="form-control-custom" 
+                               placeholder="Repeat password" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-register">
+                <i class="fas fa-user-plus me-2"></i> Register Account
+            </button>
+
+            <div class="login-link">
+                Already have an account? <a href="{{ route('login') }}">Login Here</a>
+            </div>
+
+        </form>
     </div>
-  </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  const role = document.getElementById('role');
-  const gradeWrapper = document.getElementById('gradeWrapper');
-  const gradeSelect = document.getElementById('grade');
+    document.addEventListener('DOMContentLoaded', function() {
+        const roleSelect = document.getElementById('roleSelect');
+        const gradeSelect = document.getElementById('gradeSelect');
+        const gradeContainer = document.getElementById('gradeContainer');
 
-  function updateGrade() {
-    if (!role || !gradeSelect) return;
+        function toggleGrade() {
+            if(roleSelect.value === 'teacher') {
+                gradeContainer.style.opacity = '0.5';
+                gradeSelect.disabled = true;
+                gradeSelect.required = false;
+                gradeSelect.value = ""; // clear selection
+            } else {
+                gradeContainer.style.opacity = '1';
+                gradeSelect.disabled = false;
+                gradeSelect.required = true;
+            }
+        }
 
-    if (role.value === 'teacher') {
-      gradeWrapper.classList.add('disabled');
-      gradeSelect.disabled = true;
-      gradeSelect.required = false;
-      gradeSelect.value = '';
-    } else {
-      gradeWrapper.classList.remove('disabled');
-      gradeSelect.disabled = false;
-      // make grade required for students
-      gradeSelect.required = true;
-      if (!gradeSelect.value) {
-        gradeSelect.value = '';
-      }
-    }
-  }
-
-  if (role) {
-    role.addEventListener('change', updateGrade);
-    updateGrade(); // initialize on load
-  }
-});
+        roleSelect.addEventListener('change', toggleGrade);
+        
+        // Run on load in case of old input
+        toggleGrade();
+    });
 </script>
 @endsection
