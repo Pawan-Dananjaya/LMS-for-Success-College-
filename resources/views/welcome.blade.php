@@ -816,9 +816,87 @@
                     Back to Grade Selection
                 </button>
             </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="grade-card">
+                    <div class="grade-header" style="background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);">
+                        <i class="grade-icon fas fa-laptop-code"></i>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="grade-title">Senior ICT (Grades3-5)</h3>
+                        <p class="grade-desc">
+                            Advanced typing, introduction to coding logic, and software basics (Word/Paint).
+                        </p>
+                        <div class="d-flex justify-content-between mb-4 small text-muted fw-bold">
+                            <span><i class="fas fa-book me-1"></i> 4 Modules</span>
+                            <span><i class="fas fa-star me-1"></i> Advanced</span>
+                        </div>
+
+                        @guest
+                            <button onclick="showAuthPrompt()" class="btn btn-custom btn-access w-100">
+                                <i class="fas fa-lock me-2"></i>Login to Access
+                            </button>
+                        @else
+                            @if(auth()->user()->grade >= 3 && auth()->user()->grade <= 5)
+                                <a href="{{ route('pdf.grade', '3-5') }}" class="btn btn-custom btn-access w-100">
+                                    Access Materials
+                                </a>
+                            @else
+                                <button class="btn btn-custom btn-locked w-100" disabled>
+                                    Not Available
+                                </button>
+                            @endif
+                        @endguest
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-</div>
+</section>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h5 class="text-white">Success International College</h5>
+                <p class="text-muted small">
+                    Godakawela, Sri Lanka.<br>
+                    Providing excellence in ICT education for over a decade.
+                </p>
+                <div class="mt-3">
+                    <a href="#" class="d-inline me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                    <a href="#" class="d-inline me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="#" class="d-inline"><i class="fab fa-instagram fa-lg"></i></a>
+                </div>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h5>Platform</h5>
+                <a href="#">Home</a>
+                <a href="#">Courses</a>
+                <a href="#">Pricing</a>
+            </div>
+            <div class="col-md-2 mb-4">
+                <h5>Support</h5>
+                <a href="#">Help Center</a>
+                <a href="#">Contact Admin</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="col-md-4 mb-4">
+                <h5>Contact</h5>
+                <p class="text-muted small">
+                    <i class="fas fa-envelope me-2"></i> info@successcollege.lk<br>
+                    <br>
+                    <i class="fas fa-phone me-2"></i> +94 11 234 5678
+                </p>
+            </div>
+        </div>
+        <hr style="border-color: rgba(255,255,255,0.1);">
+        <div class="text-center text-muted small mt-4">
+            &copy; {{ date('Y') }} Success International College. All Rights Reserved.
+        </div>
+    </div>
+</footer>
 
 <script>
     function showLesson(grade) {
